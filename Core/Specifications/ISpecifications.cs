@@ -8,6 +8,19 @@ namespace Core.Specifications
 
         List<Expression<Func<T,object>>> Includes {get;}
 
+
+        Expression<Func<T,object>> OrderBY {get;}
+
+        Expression<Func<T,Object>> OrderByDescending{get;}
+        
+
+        int Skip {get;}
+
+        int Take {get;}
+
+        bool IsPagingEnabled {get;}
+
+
         
 
 

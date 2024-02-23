@@ -7,6 +7,7 @@ using Core.Specifications;
 using Microsoft.AspNetCore.Http.HttpResults;
 using API.Dtos;
 using AutoMapper;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -29,26 +30,22 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDtos>>> GetProducts()
+        public async Task<ActionResult<IReadOnlyList<ProductToReturnDtos>>> GetProducts(
+            [FromQuery]ProductSpecParams productParams)
         {
-            var spec  = new ProductsWithTypesAndBrandsSpecifications();
+            var spec  = new ProductsWithTypesAndBrandsSpecifications(productParams);
 
-          var productslist = await _productsRepo.ListAsync(spec);
+            var countSpec = new ProductWithFiltersforCountSpecification(productParams);
 
-            return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDtos>>(productslist));
+            var totalItems = await _productsRepo.CountAsync(countSpec);
+
+            var productslist = await _productsRepo.ListAsync(spec);
+
+            var data = _mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturnDtos>>(productslist);
+
+            return Ok( new Pagination<ProductToReturnDtos>(productParams.pageIndex,productParams.PageSize,totalItems,data));
             
-        //   return productslist.Select(productItem => new ProductToReturnDtos{
-        //      Id  = productItem.Id,
-        //     Name = productItem.Name,
-        //     Description = productItem.Description,
-        //     Price = productItem.Price,
-        //     PictureUrl = productItem.PictureUrl,
-        //     ProductType = productItem.ProductType.Name,
-        //     ProductBrand = productItem.ProductBrand.Name
-        //   }).ToList();
-
-        //   return Ok(productslist);
-            
+       
 
         }
 
